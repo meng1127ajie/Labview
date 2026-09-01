@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\V3RttMonitor.Core\V3RttMonitor.Core.csproj" />
+    <ProjectReference Include="..\V3RttMonitor.CanAdapters\V3RttMonitor.CanAdapters.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.105.1" />
+    <PackageReference Include="ScottPlot.WPF" Version="5.1.59" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\JustFloatMonitor.ico" />
+    <None Include="..\THIRD_PARTY_NOTICES.md" Link="THIRD_PARTY_NOTICES.md" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\Drivers\CAN\ZLG\x64\runtime\**\*"
+             Link="Drivers\CAN\ZLG\x64\runtime\%(RecursiveDir)%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest" />
+    <None Include="..\Drivers\CAN\ZLG\manifest.json" Link="Drivers\CAN\ZLG\manifest.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <None Include="..\Drivers\CAN\ZLG\LICENSE.txt" Link="Drivers\CAN\ZLG\LICENSE.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>JustFloat Studio</AssemblyName>
+    <RootNamespace>V3RttMonitor.App</RootNamespace>
+    <ApplicationIcon>Assets\JustFloatMonitor.ico</ApplicationIcon>
+    <Title>JustFloat Studio</Title>
+    <Product>JustFloat Studio</Product>
+    <Description>Modular embedded signal acquisition, waveform, CAN and DBC analysis studio</Description>
+    <Company>JustFloat Studio</Company>
+    <Version>1.6.0</Version>
+    <FileVersion>1.6.0.0</FileVersion>
+    <AssemblyVersion>1.6.0.0</AssemblyVersion>
+  </PropertyGroup>
+
+</Project>

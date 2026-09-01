@@ -1,0 +1,125 @@
+<Window x:Class="V3RttMonitor.App.DbcEditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="JustFloat Studio · DBC制作器" Icon="Assets/JustFloatMonitor.ico"
+        Width="1480" Height="900" MinWidth="1180" MinHeight="720"
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource WindowBackgroundBrush}" Foreground="{StaticResource PrimaryTextBrush}"
+        UseLayoutRounding="True" SnapsToDevicePixels="True">
+    <Grid Margin="12">
+        <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+
+        <Border Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="9" Padding="14,10" Margin="0,0,0,9">
+            <DockPanel>
+                <Image Source="{StaticResource AppIcon}" Width="38" Height="38" Margin="0,0,10,0" />
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="DBC 可视化制作器" FontSize="20" FontWeight="SemiBold" />
+                    <TextBlock Text="配置报文与信号；右侧按Byte/Bit显示占位、读取顺序、越界和重叠" Foreground="{StaticResource SecondaryTextBrush}" FontSize="11" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="285" /><ColumnDefinition Width="8" /><ColumnDefinition Width="430" /><ColumnDefinition Width="8" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+
+            <Border Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="10">
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                    <TextBlock Text="数据库与报文" FontSize="16" FontWeight="SemiBold" />
+                    <StackPanel Grid.Row="1" Margin="0,9,0,8">
+                        <TextBlock Text="数据库名称" Foreground="{StaticResource SecondaryTextBrush}" FontSize="11" />
+                        <TextBox Text="{Binding DatabaseName, UpdateSourceTrigger=PropertyChanged}" />
+                        <WrapPanel Margin="0,5,0,0">
+                            <Button Style="{StaticResource CompactIconTextButton}" Tag="&#xE710;" Content="报文" Click="AddMessageButton_OnClick" />
+                            <Button Style="{StaticResource CompactIconTextButton}" Tag="&#xE738;" Content="报文" Click="RemoveMessageButton_OnClick" />
+                        </WrapPanel>
+                    </StackPanel>
+                    <ListBox x:Name="MessageList" Grid.Row="2" ItemsSource="{Binding Messages}" SelectedItem="{Binding SelectedMessage}" SelectionChanged="MessageList_OnSelectionChanged" BorderBrush="{StaticResource BorderBrush}" Background="#0B1220">
+                        <ListBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding DisplayText}" FontFamily="Consolas" Margin="4" /></DataTemplate></ListBox.ItemTemplate>
+                    </ListBox>
+                    <Grid Grid.Row="3" Margin="0,9,0,0" DataContext="{Binding SelectedMessage}">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="78" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                        <TextBlock Text="ID" Foreground="{StaticResource SecondaryTextBrush}" VerticalAlignment="Center" /><TextBox Grid.Column="1" Text="{Binding IdText, UpdateSourceTrigger=LostFocus}" LostFocus="EditorValue_OnChanged" />
+                        <TextBlock Grid.Row="1" Text="名称" Foreground="{StaticResource SecondaryTextBrush}" VerticalAlignment="Center" /><TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Grid.Row="2" Text="DLC/字节" Foreground="{StaticResource SecondaryTextBrush}" VerticalAlignment="Center" /><TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Length, UpdateSourceTrigger=LostFocus}" LostFocus="EditorValue_OnChanged" />
+                        <TextBlock Grid.Row="3" Text="周期/ms" Foreground="{StaticResource SecondaryTextBrush}" VerticalAlignment="Center" /><TextBox Grid.Row="3" Grid.Column="1" Text="{Binding CycleTimeMs, UpdateSourceTrigger=LostFocus}" />
+                        <CheckBox Grid.Row="4" Grid.ColumnSpan="2" Content="29位扩展帧" IsChecked="{Binding IsExtended}" Margin="0,5,0,0" />
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="2" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="10">
+                <Grid DataContext="{Binding SelectedMessage}">
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="210" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                    <DockPanel>
+                        <WrapPanel DockPanel.Dock="Right">
+                            <Button Style="{StaticResource CompactIconTextButton}" Tag="&#xE710;" Content="信号" Click="AddSignalButton_OnClick" />
+                            <Button Style="{StaticResource CompactIconTextButton}" Tag="&#xE738;" Content="信号" Click="RemoveSignalButton_OnClick" />
+                        </WrapPanel>
+                        <TextBlock Text="信号定义" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    </DockPanel>
+                    <DataGrid x:Name="SignalGrid" Grid.Row="1" ItemsSource="{Binding Signals}" SelectedItem="{Binding SelectedSignal}" SelectionChanged="SignalGrid_OnSelectionChanged" AutoGenerateColumns="False" Margin="0,7,0,8">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="名称" Binding="{Binding Name}" Width="*" />
+                            <DataGridTextColumn Header="Start" Binding="{Binding StartBit}" Width="55" />
+                            <DataGridTextColumn Header="Bits" Binding="{Binding Length}" Width="48" />
+                            <DataGridTextColumn Header="位序" Binding="{Binding ByteOrder}" Width="76" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                        <Grid DataContext="{Binding SelectedSignal}">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="92" /><ColumnDefinition Width="*" /><ColumnDefinition Width="92" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="信号名称" Foreground="{StaticResource SecondaryTextBrush}" VerticalAlignment="Center" /><TextBox Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" TextChanged="EditorValue_OnTextChanged" />
+                            <TextBlock Grid.Row="1" Text="起始位" Foreground="{StaticResource SecondaryTextBrush}" VerticalAlignment="Center" /><TextBox Grid.Row="1" Grid.Column="1" Text="{Binding StartBit, UpdateSourceTrigger=LostFocus}" LostFocus="EditorValue_OnChanged" />
+                            <TextBlock Grid.Row="1" Grid.Column="2" Text="长度/bit" Foreground="{StaticResource SecondaryTextBrush}" VerticalAlignment="Center" /><TextBox Grid.Row="1" Grid.Column="3" Text="{Binding Length, UpdateSourceTrigger=LostFocus}" LostFocus="EditorValue_OnChanged" />
+                            <TextBlock Grid.Row="2" Text="字节序" Foreground="{StaticResource SecondaryTextBrush}" VerticalAlignment="Center" />
+                            <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding ByteOrderOptions}" SelectedItem="{Binding ByteOrder}" SelectionChanged="EditorValue_OnChanged" />
+                            <CheckBox Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Content="有符号数" IsChecked="{Binding IsSigned}" Checked="EditorValue_OnChanged" Unchecked="EditorValue_OnChanged" />
+                            <TextBlock Grid.Row="3" Text="系数" Foreground="{StaticResource SecondaryTextBrush}" VerticalAlignment="Center" /><TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Factor, UpdateSourceTrigger=LostFocus}" LostFocus="EditorValue_OnChanged" />
+                            <TextBlock Grid.Row="3" Grid.Column="2" Text="偏移" Foreground="{StaticResource SecondaryTextBrush}" VerticalAlignment="Center" /><TextBox Grid.Row="3" Grid.Column="3" Text="{Binding Offset, UpdateSourceTrigger=LostFocus}" LostFocus="EditorValue_OnChanged" />
+                            <TextBlock Grid.Row="4" Text="最小值" Foreground="{StaticResource SecondaryTextBrush}" VerticalAlignment="Center" /><TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Minimum, UpdateSourceTrigger=LostFocus}" />
+                            <TextBlock Grid.Row="4" Grid.Column="2" Text="最大值" Foreground="{StaticResource SecondaryTextBrush}" VerticalAlignment="Center" /><TextBox Grid.Row="4" Grid.Column="3" Text="{Binding Maximum, UpdateSourceTrigger=LostFocus}" />
+                            <TextBlock Grid.Row="5" Text="单位" Foreground="{StaticResource SecondaryTextBrush}" VerticalAlignment="Center" /><TextBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding Unit, UpdateSourceTrigger=PropertyChanged}" />
+                            <CheckBox Grid.Row="6" Grid.ColumnSpan="2" Content="Multiplexer选择器" IsChecked="{Binding IsMultiplexer}" />
+                            <StackPanel Grid.Row="6" Grid.Column="2" Grid.ColumnSpan="2" Orientation="Horizontal"><TextBlock Text="Mux值" Foreground="{StaticResource SecondaryTextBrush}" VerticalAlignment="Center" /><TextBox Width="75" Text="{Binding MultiplexerValue, UpdateSourceTrigger=LostFocus}" /></StackPanel>
+                        </Grid>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="4" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="10">
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Right" Text="点击任意bit可设置当前信号StartBit" Foreground="{StaticResource SecondaryTextBrush}" FontSize="11" VerticalAlignment="Center" Margin="12,0,0,0" />
+                        <TextBlock Text="Byte / Bit 布局" FontSize="16" FontWeight="SemiBold" />
+                    </DockPanel>
+                    <Border Grid.Row="1" Background="#10253B" BorderBrush="#1D4F73" BorderThickness="1" CornerRadius="5" Padding="9" Margin="0,8">
+                        <TextBlock x:Name="EndianHelpText" Text="Intel：StartBit是LSB，数值位从低到高连续递增；Motorola：StartBit是MSB，跨字节按DBC锯齿位序读取。" Foreground="{StaticResource SecondaryTextBrush}" TextWrapping="Wrap" />
+                    </Border>
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Background="#0B1220" Padding="8">
+                        <Grid x:Name="BitMapGrid" />
+                    </ScrollViewer>
+                    <Border Grid.Row="3" Background="#0B1220" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="5" Padding="9" Margin="0,8,0,0">
+                        <TextBlock x:Name="ValidationText" Text="请选择信号。" Foreground="{StaticResource SecondaryTextBrush}" TextWrapping="Wrap" />
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="2" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="10,7" Margin="0,9,0,0">
+            <DockPanel>
+                <TextBlock x:Name="FooterStatusText" Text="红色=重叠；青色=当前信号；蓝色=其他信号。保存前会检查越界和重复名称。" Foreground="{StaticResource SecondaryTextBrush}" VerticalAlignment="Center" />
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button Content="取消" MinWidth="90" Click="CancelButton_OnClick" />
+                    <Button AutomationProperties.AutomationId="SaveDbcButton" Style="{StaticResource IconTextButton}" Tag="&#xE74E;" Content="保存DBC…" Background="#075985" BorderBrush="#38BDF8" MinWidth="120" Click="SaveButton_OnClick" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>

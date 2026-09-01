@@ -1,0 +1,12 @@
+{
+  "provider": "ZLG",
+  "sdk": "ZLGCAN",
+  "manualVersion": "1.21",
+  "architecture": "x64",
+  "runtimeEntry": "x64/runtime/zlgcan.dll",
+  "runtimeDependencies": "x64/runtime/kerneldlls",
+  "sha256": "BA5D526921A2B5C491BB1105EF045763B10D7D4F3780A9DCB7C111BF03CBC71C",
+  "source": "Official ZLGCAN SDK supplied by the user",
+  "license": "LICENSE.txt",
+  "notes": "The user-mode SDK files do not replace installation of the official Windows USB-CAN device driver."
+}

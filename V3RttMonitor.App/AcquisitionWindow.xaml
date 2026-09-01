@@ -1,0 +1,170 @@
+<Window x:Class="V3RttMonitor.App.AcquisitionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="clr-namespace:V3RttMonitor.App.Views"
+        Title="JustFloat Studio · 采集工作台" Icon="Assets/JustFloatMonitor.ico"
+        Width="1500" Height="900" MinWidth="1120" MinHeight="700"
+        WindowState="Maximized" WindowStartupLocation="CenterScreen"
+        AllowDrop="True" Drop="Window_OnDrop"
+        Background="{StaticResource WindowBackgroundBrush}" Foreground="{StaticResource PrimaryTextBrush}"
+        UseLayoutRounding="True" SnapsToDevicePixels="True">
+    <Grid Margin="10">
+        <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+
+        <Border Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="9" Padding="10,7" Margin="0,0,0,8">
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                <Button x:Name="BackButton" AutomationProperties.AutomationId="ReturnFromAcquisitionButton" Style="{StaticResource IconTextButton}" Tag="&#xE72B;" Content="返回启动中心" Click="ReturnButton_OnClick" Padding="11,6" ToolTip="返回上一个位置（Esc）" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="12,0,0,0">
+                    <Image Source="{StaticResource AppIcon}" Width="34" Height="34" Margin="0,0,9,0" />
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock x:Name="WorkspaceTitle" Text="J-Link 数据采集" FontSize="17" FontWeight="SemiBold" />
+                        <TextBlock x:Name="WorkspaceSubtitle" Text="先连接与接收，再进入同一工作台内的波形分析" Foreground="{StaticResource SecondaryTextBrush}" FontSize="10" />
+                    </StackPanel>
+                </StackPanel>
+                <Border Grid.Column="2" Background="#0B1220" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="7" Padding="10,5">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Width="9" Height="9" Fill="{Binding StatusBrush}" Margin="0,0,7,0" />
+                        <TextBlock Text="{Binding ConnectionModeDisplayName}" FontWeight="SemiBold" />
+                        <TextBlock Text=" · " Foreground="{StaticResource SecondaryTextBrush}" />
+                        <TextBlock Text="{Binding ConnectionStatus}" Foreground="{StaticResource SecondaryTextBrush}" />
+                        <TextBlock Text=" · " Foreground="#64748B" />
+                        <TextBlock Text="{Binding ConnectionDetail}" Foreground="{StaticResource SecondaryTextBrush}" MaxWidth="300" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Border x:Name="ConnectionPanel" Grid.Row="1" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="9" Padding="10" Margin="0,0,0,8">
+            <Grid>
+                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="210" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                    <TextBlock Text="连接来源" Foreground="{StaticResource SecondaryTextBrush}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="4,0,8,0" />
+                    <ComboBox x:Name="ConnectionSourceCombo" AutomationProperties.AutomationId="ConnectionSourceSelector" Grid.Column="1" SelectionChanged="ConnectionSourceCombo_OnSelectionChanged">
+                        <ComboBoxItem Content="J-Link RTT" Tag="JLinkRtt" IsSelected="True" />
+                        <ComboBoxItem Content="TCP 直连" Tag="TcpDirect" />
+                        <ComboBoxItem AutomationProperties.AutomationId="HssSourceOption" Content="J-Link HSS / ELF" Tag="Hss" />
+                    </ComboBox>
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <TextBlock Text="信号模板" Foreground="{StaticResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <TextBlock Text="{Binding TemplateStatusText}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <Button Style="{StaticResource IconTextButton}" Tag="&#xE8E5;" Content="选择Excel…" Command="{Binding LoadTemplateCommand}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="3" Orientation="Horizontal" Margin="12,0,0,0">
+                        <Ellipse Width="13" Height="13" Fill="{Binding DataStatusBrush}" Stroke="#374151" StrokeThickness="2" Margin="0,0,5,0" />
+                        <TextBlock Text="{Binding DataStatusText}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Grid>
+
+                <Grid x:Name="JLinkPanel" Grid.Row="1" Margin="0,8,0,0">
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="220" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="110" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                    <TextBlock Text="目标设备" VerticalAlignment="Center" Foreground="{StaticResource SecondaryTextBrush}" Margin="4" /><TextBox Grid.Column="1" Text="{Binding Device}" />
+                    <TextBlock Grid.Column="2" Text="SWD速度/kHz" VerticalAlignment="Center" Foreground="{StaticResource SecondaryTextBrush}" Margin="12,4,4,4" /><TextBox Grid.Column="3" Text="{Binding SpeedKhz}" />
+                    <TextBlock Grid.Column="4" Text="程序会启动J-Link GDB Server并连接RTT Channel 0" Foreground="{StaticResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="14,0" />
+                    <Expander Grid.Row="1" Grid.ColumnSpan="5" Header="高级J-Link参数" Foreground="{StaticResource SecondaryTextBrush}" Margin="2,5,2,0">
+                        <Grid Margin="20,4,0,0">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="90" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="72" /></Grid.ColumnDefinitions>
+                            <TextBlock Text="安装目录" VerticalAlignment="Center" Margin="0,0,6,0" /><TextBox Grid.Column="1" Text="{Binding JLinkDirectory}" />
+                            <TextBlock Grid.Column="2" Text="RTT端口" VerticalAlignment="Center" Margin="12,0,4,0" /><TextBox Grid.Column="3" Text="{Binding RttPort}" />
+                            <TextBlock Grid.Column="4" Text="通道数" VerticalAlignment="Center" Margin="12,0,4,0" /><TextBox Grid.Column="5" Text="{Binding ExpectedFloatCount}" ToolTip="0=自动检测" />
+                        </Grid>
+                    </Expander>
+                </Grid>
+
+                <Grid x:Name="TcpPanel" Grid.Row="1" Margin="0,8,0,0" Visibility="Collapsed">
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="220" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="110" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                    <TextBlock Text="服务器IP" VerticalAlignment="Center" Foreground="{StaticResource SecondaryTextBrush}" Margin="4" /><TextBox Grid.Column="1" Text="{Binding ServerIp}" />
+                    <TextBlock Grid.Column="2" Text="端口" VerticalAlignment="Center" Foreground="{StaticResource SecondaryTextBrush}" Margin="12,4,4,4" /><TextBox Grid.Column="3" Text="{Binding ServerPort}" />
+                    <TextBlock Grid.Column="4" Text="适用于单片机、IDE或外部数据桥提供的TCP Server" Foreground="{StaticResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="14,0" />
+                    <Expander Grid.Row="1" Grid.ColumnSpan="5" Header="高级TCP参数" Foreground="{StaticResource SecondaryTextBrush}" Margin="2,5,2,0">
+                        <Grid Margin="20,4,0,0">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="260" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="80" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                            <TextBlock Text="握手数据" VerticalAlignment="Center" Margin="0,0,6,0" /><TextBox Grid.Column="1" Text="{Binding HandshakeData}" ToolTip="可留空；支持\r、\n、\0" />
+                            <TextBlock Grid.Column="2" Text="通道数" VerticalAlignment="Center" Margin="12,0,4,0" /><TextBox Grid.Column="3" Text="{Binding ExpectedFloatCount}" ToolTip="0=自动" />
+                            <TextBlock Grid.Column="4" Text="通道数0表示根据连续帧自动识别" Foreground="{StaticResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="12,0" />
+                        </Grid>
+                    </Expander>
+                </Grid>
+
+                <Grid x:Name="HssPanel" Grid.Row="1" Margin="0,8,0,0" Visibility="Collapsed">
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="105" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                    <TextBlock Text="ELF文件" VerticalAlignment="Center" Foreground="{StaticResource SecondaryTextBrush}" Margin="4" />
+                    <TextBox Grid.Column="1" Text="{Binding HssElfPath, Mode=OneWay}" IsReadOnly="True" ToolTip="包含符号表和DWARF调试信息的ARM ELF" />
+                    <Button Grid.Column="2" Style="{StaticResource IconTextButton}" Tag="&#xE8E5;" Content="选择ELF…" Click="HssBrowseElfButton_OnClick" />
+                    <TextBlock Grid.Column="3" Grid.ColumnSpan="2" Text="{Binding HssElfStatus}" Foreground="{StaticResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="10,0" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Grid.Row="1" Text="采样频率" VerticalAlignment="Center" Foreground="{StaticResource SecondaryTextBrush}" Margin="4" />
+                    <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
+                        <TextBox Width="95" Text="{Binding HssSampleRateHz}" ToolTip="最终频率受J-Link型号GetCaps限制" />
+                        <TextBlock Text="Hz" VerticalAlignment="Center" Margin="5,0,16,0" />
+                        <TextBlock Text="DLL" Foreground="{StaticResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="0,0,5,0" />
+                        <TextBlock Text="{Binding HssDllPath}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="430" />
+                    </StackPanel>
+                    <Button Grid.Row="1" Grid.Column="2" Style="{StaticResource IconTextButton}" Tag="&#xE71D;" Content="选择变量…" Click="HssSelectVariablesButton_OnClick" />
+                    <Button Grid.Row="1" Grid.Column="3" Content="检查环境" Click="HssValidateButton_OnClick" />
+                    <TextBlock Grid.Row="1" Grid.Column="4" Text="{Binding HssVariableStatus}" Foreground="{StaticResource AccentBrush}" VerticalAlignment="Center" Margin="10,0" TextTrimming="CharacterEllipsis" />
+                </Grid>
+
+                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                    <Button AutomationProperties.AutomationId="AcquisitionConnectButton" Style="{StaticResource IconTextButton}" Tag="&#xE768;" Content="连接并查看波形" Command="{Binding ConnectCommand}" Click="ConnectButton_OnClick" Background="#075985" MinWidth="132" />
+                    <Button Style="{StaticResource IconTextButton}" Tag="&#xE71A;" Content="断开" Command="{Binding DisconnectCommand}" MinWidth="76" />
+                    <Button Style="{StaticResource IconTextButton}" Tag="&#xE74E;" Content="{Binding RecordButtonText}" Command="{Binding RecordCommand}" MinWidth="98" />
+                    <Button Style="{StaticResource IconTextButton}" Tag="&#xE8E5;" Content="加载BIN…" Command="{Binding LoadBinaryCommand}" MinWidth="92" />
+                    <Button Style="{StaticResource IconTextButton}" Tag="&#xE894;" Content="清空数据" Command="{Binding ClearHistoryCommand}" MinWidth="92" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <UniformGrid x:Name="StatsPanel" Grid.Row="2" Columns="6" Margin="-3,0,-3,8">
+            <Border Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Margin="3" Padding="11,7"><StackPanel><TextBlock Text="接收帧" Foreground="{StaticResource SecondaryTextBrush}" FontSize="10" /><TextBlock Text="{Binding FrameCountText}" FontSize="17" FontWeight="SemiBold" /></StackPanel></Border>
+            <Border Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Margin="3" Padding="11,7"><StackPanel><TextBlock Text="实时 / 平均帧率" Foreground="{StaticResource SecondaryTextBrush}" FontSize="10" /><TextBlock Text="{Binding FrameRateText}" FontSize="17" FontWeight="SemiBold" /></StackPanel></Border>
+            <Border Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Margin="3" Padding="11,7"><StackPanel><TextBlock Text="SEQ丢帧 / 缺口" Foreground="{StaticResource SecondaryTextBrush}" FontSize="10" /><TextBlock Text="{Binding LostFrameText}" FontSize="17" FontWeight="SemiBold" /><TextBlock Text="{Binding SequenceHealthText}" Foreground="{StaticResource SecondaryTextBrush}" FontSize="9" /></StackPanel></Border>
+            <Border Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Margin="3" Padding="11,7"><StackPanel><TextBlock Text="丢帧率 / 步长" Foreground="{StaticResource SecondaryTextBrush}" FontSize="10" /><TextBlock Text="{Binding LostRateText}" FontSize="17" FontWeight="SemiBold" /></StackPanel></Border>
+            <Border Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Margin="3" Padding="11,7"><StackPanel><TextBlock Text="协议结构" Foreground="{StaticResource SecondaryTextBrush}" FontSize="10" /><TextBlock Text="{Binding SchemaText}" FontSize="15" FontWeight="SemiBold" /></StackPanel></Border>
+            <Border Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Margin="3" Padding="11,7"><StackPanel><TextBlock Text="最近吞吐" Foreground="{StaticResource SecondaryTextBrush}" FontSize="10" /><TextBlock Text="{Binding ThroughputText}" FontSize="17" FontWeight="SemiBold" /></StackPanel></Border>
+        </UniformGrid>
+
+        <Grid x:Name="PreviewPanel" Grid.Row="3">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="3*" /><ColumnDefinition Width="8" /><ColumnDefinition Width="2*" /></Grid.ColumnDefinitions>
+            <Border Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="10">
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" AutomationProperties.AutomationId="OpenWaveformFromAcquisitionButton" Tag="&#xE8A7;" Content="查看波形" Click="OpenWaveformButton_OnClick" Background="#075985">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource IconTextButton}">
+                                    <Style.Triggers><DataTrigger Binding="{Binding Fields.Count}" Value="0"><Setter Property="IsEnabled" Value="False" /><Setter Property="ToolTip" Value="收到数据或加载BIN/Excel后才可进入波形" /></DataTrigger></Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        <StackPanel><TextBlock Text="实时字段预览" FontSize="17" FontWeight="SemiBold" /><TextBlock Text="Excel或数据流定义的全部字段；绘图勾选在波形工作台管理" Foreground="{StaticResource SecondaryTextBrush}" FontSize="10" /></StackPanel>
+                    </DockPanel>
+                    <DataGrid Grid.Row="1" ItemsSource="{Binding Fields}" AutoGenerateColumns="False" IsReadOnly="True" Margin="0,8,0,0" EnableRowVirtualization="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="#" Binding="{Binding Index}" Width="48" />
+                            <DataGridTextColumn Header="字段" Binding="{Binding Key}" Width="160" />
+                            <DataGridTextColumn Header="含义" Binding="{Binding DisplayName}" Width="*" />
+                            <DataGridTextColumn Header="数值" Binding="{Binding ValueText}" Width="130" />
+                            <DataGridTextColumn Header="单位" Binding="{Binding Unit}" Width="80" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+            <Border Grid.Column="2" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="10">
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                    <StackPanel><TextBlock Text="连接日志" FontSize="17" FontWeight="SemiBold" /><TextBlock Text="连接、自动重试、协议锁定和HSS能力检查信息" Foreground="{StaticResource SecondaryTextBrush}" FontSize="10" /></StackPanel>
+                    <TextBox Grid.Row="1" Text="{Binding LogText, Mode=OneWay}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Margin="0,8,0,0" FontFamily="Consolas" />
+                    <TextBlock Grid.Row="2" Text="HSS仅连接真实J-Link；变量数量和最高采样频率以探针GetCaps返回能力为准。" Foreground="#FBBF24" FontSize="10" TextWrapping="Wrap" Margin="2,7,2,0" />
+                </Grid>
+            </Border>
+        </Grid>
+
+        <TextBlock x:Name="FooterText" Grid.Row="4" Text="返回启动中心不会停止当前接收或BIN记录；真正退出时才统一释放J-Link、TCP和文件资源。" Foreground="{StaticResource SecondaryTextBrush}" FontSize="10" Margin="4,7,0,0" />
+
+        <views:WaveformAnalysisView x:Name="EmbeddedWaveform" AutomationProperties.AutomationId="EmbeddedWaveformRoot" Grid.Row="1" Grid.RowSpan="4" Panel.ZIndex="20" Visibility="Collapsed" />
+    </Grid>
+</Window>

@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\V3RttMonitor.Core\V3RttMonitor.Core.csproj" />
+    <ProjectReference Include="..\V3RttMonitor.CanAdapters\V3RttMonitor.CanAdapters.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\Drivers\CAN\ZLG\x64\runtime\**\*"
+             Link="Drivers\CAN\ZLG\x64\runtime\%(RecursiveDir)%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

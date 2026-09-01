@@ -1,0 +1,221 @@
+<UserControl x:Class="V3RttMonitor.App.Views.WaveformAnalysisView"
+             x:Name="Root"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Focusable="True"
+             Background="Transparent">
+    <UserControl.Resources>
+        <Style x:Key="WaveCleanupContextMenu" TargetType="ContextMenu">
+            <Setter Property="Background" Value="{StaticResource PanelRaisedBrush}" />
+            <Setter Property="Foreground" Value="{StaticResource PrimaryTextBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="4" />
+            <Setter Property="HasDropShadow" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ContextMenu">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="7"
+                                Padding="{TemplateBinding Padding}">
+                            <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="WaveCleanupMenuItem" TargetType="MenuItem">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{StaticResource PrimaryTextBrush}" />
+            <Setter Property="Padding" Value="10,8" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="MenuItem">
+                        <Border x:Name="MenuItemBorder"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="5"
+                                Padding="{TemplateBinding Padding}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="22" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{TemplateBinding Tag}"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="14"
+                                           Foreground="{StaticResource AccentBrush}"
+                                           VerticalAlignment="Center" />
+                                <ContentPresenter Grid.Column="1"
+                                                  ContentSource="Header"
+                                                  RecognizesAccessKey="True"
+                                                  VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="MenuItemBorder" Property="Background" Value="#1E3A5F" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="MenuItemBorder" Property="Opacity" Value="0.45" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="400" />
+            <ColumnDefinition Width="8" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Border Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="8">
+            <Grid>
+                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="信号目录" FontSize="17" FontWeight="SemiBold" />
+                        <TextBlock Text="勾选显示，并分配到某个坐标图" Foreground="{StaticResource SecondaryTextBrush}" FontSize="11" />
+                    </StackPanel>
+                    <WrapPanel Grid.Row="1" Margin="0,4,0,0">
+                            <Button Style="{StaticResource CompactIconTextButton}" Tag="&#xE710;" Content="图" Click="AddPlotButton_OnClick" ToolTip="新增坐标图" Background="#075985" />
+                            <Button Style="{StaticResource CompactIconTextButton}" Tag="&#xE738;" Content="图" Click="RemovePlotButton_OnClick" ToolTip="删除活动坐标图" />
+                            <Button x:Name="CleanupMenuButton"
+                                    Style="{StaticResource CompactIconTextButton}"
+                                    Tag="&#xE74D;"
+                                    Content="清理 ▾"
+                                    Click="CleanupMenuButton_OnClick"
+                                    ToolTip="集中管理数据、信号、游标和视图的清理操作">
+                                <Button.ContextMenu>
+                                    <ContextMenu Style="{StaticResource WaveCleanupContextMenu}"
+                                                 ItemContainerStyle="{StaticResource WaveCleanupMenuItem}">
+                                        <MenuItem Header="清除数据（保留 Excel 配置）"
+                                                  Tag="&#xE74D;"
+                                                  Click="ClearDataButton_OnClick"
+                                                  ToolTip="清除当前接收/BIN历史、波形和统计；保留Excel字段配置及磁盘BIN文件" />
+                                        <MenuItem Header="取消全部信号勾选"
+                                                  Tag="&#xE894;"
+                                                  Click="ClearSignalsButton_OnClick"
+                                                  ToolTip="只取消波形显示，不删除已接收数据和字段配置" />
+                                        <Separator Margin="6,3" Background="{StaticResource BorderBrush}" />
+                                        <MenuItem Header="清除 A/B 游标"
+                                                  Tag="&#xE81E;"
+                                                  Click="ClearCursorsButton_OnClick"
+                                                  ToolTip="清除双游标、采样点和数据提示" />
+                                        <MenuItem Header="恢复活动图视图"
+                                                  Tag="&#xE80F;"
+                                                  Click="HomeButton_OnClick"
+                                                  ToolTip="活动坐标图恢复自动范围" />
+                                    </ContextMenu>
+                                </Button.ContextMenu>
+                            </Button>
+                    </WrapPanel>
+                    <Border Grid.Row="2" Background="#10253B" BorderBrush="#1D4F73" BorderThickness="1" CornerRadius="5" Padding="8,6" Margin="4,5,4,0">
+                        <DockPanel>
+                            <TextBlock Text="&#xE946;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource AccentBrush}" FontSize="14" Margin="0,0,7,0" />
+                            <TextBlock Text="二进制只能识别通道数量；请加载 Excel 定义名称、单位、分组和默认图。" Foreground="{StaticResource SecondaryTextBrush}" FontSize="11" TextWrapping="Wrap" />
+                        </DockPanel>
+                    </Border>
+                    <TextBox x:Name="SearchBox" Grid.Row="3" Margin="0,7,0,0" TextChanged="SearchBox_OnTextChanged" ToolTip="搜索字段名、含义、单位或分组" />
+                </Grid>
+
+                <ListBox x:Name="SignalList" Grid.Row="1" Margin="0,8,0,0" BorderThickness="0" Background="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
+                    <ListBox.GroupStyle>
+                        <GroupStyle>
+                            <GroupStyle.ContainerStyle>
+                                <Style TargetType="GroupItem">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="GroupItem">
+                                                <Expander IsExpanded="True" Margin="0,2">
+                                                    <Expander.Header>
+                                                        <DockPanel>
+                                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="{StaticResource AccentBrush}" />
+                                                            <TextBlock Text="{Binding ItemCount, StringFormat=  ({0})}" Foreground="{StaticResource SecondaryTextBrush}" />
+                                                        </DockPanel>
+                                                    </Expander.Header>
+                                                    <ItemsPresenter />
+                                                </Expander>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </GroupStyle.ContainerStyle>
+                        </GroupStyle>
+                    </ListBox.GroupStyle>
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="Padding" Value="2" />
+                            <Setter Property="Margin" Value="0,1" />
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ToolTip="{Binding DisplayName}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="18" /><ColumnDefinition Width="26" /><ColumnDefinition Width="120" />
+                                    <ColumnDefinition Width="*" /><ColumnDefinition Width="55" /><ColumnDefinition Width="58" />
+                                </Grid.ColumnDefinitions>
+                                <Border Width="10" Height="10" CornerRadius="2" Background="{Binding ColorHex}" VerticalAlignment="Center" />
+                                <CheckBox Grid.Column="1" IsChecked="{Binding IsPlotted, UpdateSourceTrigger=PropertyChanged}" Tag="{Binding}" Click="SignalCheckBox_OnClick" HorizontalAlignment="Center" />
+                                <TextBlock Grid.Column="2" Text="{Binding Key}" FontFamily="Consolas" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Grid.Column="3" Text="{Binding DisplayName}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Grid.Column="4" Text="{Binding Unit}" Foreground="{StaticResource SecondaryTextBrush}" VerticalAlignment="Center" />
+                                <ComboBox Grid.Column="5" ItemsSource="{Binding PlotGroupOptions, ElementName=Root}" SelectedItem="{Binding PlotGroup, UpdateSourceTrigger=PropertyChanged}" ToolTip="分配到坐标图" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <Border Grid.Row="2" Background="#0B1220" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="5" Padding="8" Margin="0,7,0,0">
+                    <TextBlock x:Name="SignalStatusText" Text="活动图：图 1" Foreground="{StaticResource SecondaryTextBrush}" />
+                </Border>
+            </Grid>
+        </Border>
+
+        <Border Grid.Column="2" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="8">
+            <Grid>
+                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                <StackPanel Margin="0,0,0,6">
+                    <WrapPanel VerticalAlignment="Center">
+                        <RadioButton x:Name="PointerModeButton" Style="{StaticResource IconModeButton}" GroupName="PlotInteraction" Tag="&#xE7C9;" Content="指针" IsChecked="True" Checked="PointerButton_OnChecked" ToolTip="持续显示鼠标所指时刻的最近采样值" />
+                        <RadioButton x:Name="SampleModeButton" Style="{StaticResource IconModeButton}" GroupName="PlotInteraction" Tag="&#xE718;" Content="点选" Checked="SampleButton_OnChecked" ToolTip="左键点击并锁定最近采样点；进入该模式会自动暂停显示" />
+                        <RadioButton x:Name="RectangleZoomModeButton" AutomationProperties.AutomationId="JLinkRectangleZoomButton" Style="{StaticResource IconModeButton}" GroupName="PlotInteraction" Tag="&#xE71E;" Content="框选放大" Checked="RectangleZoomButton_OnChecked" ToolTip="左键拖出矩形范围进行放大；右键仍可平移" />
+                        <ToggleButton x:Name="DualCursorButton" Style="{StaticResource IconToggleButton}" Tag="&#xE81E;" Content="双游标" Checked="DualCursorButton_OnChecked" Unchecked="DualCursorButton_OnUnchecked" ToolTip="增加B游标，测量Δt和各信号ΔY；Tab切换活动游标" />
+                        <ToggleButton x:Name="PauseDisplayButton" Style="{StaticResource IconToggleButton}" Tag="&#xE769;" Content="暂停" Checked="PauseDisplayButton_OnChecked" Unchecked="PauseDisplayButton_OnUnchecked" ToolTip="冻结当前波形用于分析；后台采集保持运行（快捷键Space）" />
+                        <Separator Width="8" Opacity="0" />
+                        <Button Style="{StaticResource CompactIconTextButton}" Tag="&#xE80F;" Content="复位" Click="HomeButton_OnClick" ToolTip="活动图恢复自动范围（快捷键Home）" />
+                        <Button Style="{StaticResource CompactIconTextButton}" Tag="&#xE9D2;" Content="适配Y" Click="FitVisibleYButton_OnClick" ToolTip="只按当前可见时间范围重新适配活动图Y轴（快捷键Y）" />
+                        <Button x:Name="MaximizePlotButton" Style="{StaticResource CompactIconTextButton}" Tag="&#xE740;" Content="最大化" Click="MaximizePlotButton_OnClick" ToolTip="只显示当前蓝框坐标图" />
+                    </WrapPanel>
+                    <WrapPanel VerticalAlignment="Center" Margin="0,1,0,0">
+                        <CheckBox x:Name="ShowPointsCheck" Content="采样点" Checked="DisplayOption_OnChanged" Unchecked="DisplayOption_OnChanged" />
+                        <CheckBox x:Name="ShowLegendCheck" Content="图例" IsChecked="True" Checked="DisplayOption_OnChanged" Unchecked="DisplayOption_OnChanged" />
+                        <CheckBox x:Name="AutoFollowCheck" Content="追踪最新" IsChecked="True" />
+                        <TextBlock Text="时间窗口" Foreground="{StaticResource SecondaryTextBrush}" VerticalAlignment="Center" Margin="12,0,3,0" />
+                        <ComboBox x:Name="WindowCombo" AutomationProperties.AutomationId="JLinkTimeWindowCombo" Width="80" SelectionChanged="DisplayOption_OnChanged">
+                            <ComboBoxItem Content="1 s" Tag="1" /><ComboBoxItem Content="5 s" Tag="5" />
+                            <ComboBoxItem Content="10 s" Tag="10" /><ComboBoxItem Content="30 s" Tag="30" />
+                            <ComboBoxItem Content="60 s" Tag="60" /><ComboBoxItem Content="全部" Tag="0" IsSelected="True" />
+                        </ComboBox>
+                        <Button Style="{StaticResource IconTextButton}" Tag="&#xE74E;" Content="导出PNG" Click="ExportPngButton_OnClick" />
+                    </WrapPanel>
+                </StackPanel>
+
+                <ScrollViewer x:Name="PlotScroll" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Background="#0B1220">
+                    <StackPanel x:Name="PlotPanel" Margin="4" />
+                </ScrollViewer>
+
+                <Border Grid.Row="2" Background="#0B1220" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="5" Padding="8" Margin="0,6,0,0">
+                    <TextBlock x:Name="CursorText" Text="左键指针/点选，右键拖动平移，滚轮缩放。快捷键：Space暂停，Home恢复，Y适配当前Y，C清除游标，←/→与Tab控制双游标。" Foreground="{StaticResource SecondaryTextBrush}" TextWrapping="Wrap" />
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

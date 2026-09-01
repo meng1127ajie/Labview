@@ -1,0 +1,27 @@
+VERSION "JustFloat Studio CAN Demo"
+
+NS_ :
+    CM_
+    BA_
+    VAL_
+
+BS_:
+
+BU_: Vector__XXX
+
+BO_ 256 MotorStatus: 8 Vector__XXX
+ SG_ MotorSpeed : 0|16@1+ (0.1,0) [0|6553.5] "rpm" Vector__XXX
+ SG_ BusVoltage : 16|16@1+ (0.01,0) [0|655.35] "V" Vector__XXX
+ SG_ PhaseCurrent : 32|16@1- (0.1,0) [-3276.8|3276.7] "A" Vector__XXX
+ SG_ RunState : 48|8@1+ (1,0) [0|255] "" Vector__XXX
+
+BO_ 512 MotorSensors: 8 Vector__XXX
+ SG_ Temperature : 7|16@0+ (0.1,-40) [-40|6513.5] "degC" Vector__XXX
+ SG_ Torque : 23|16@0- (0.1,0) [-3276.8|3276.7] "Nm" Vector__XXX
+
+BO_ 768 DbcOnlyMessage: 8 Vector__XXX
+ SG_ DbcOnlySignal : 0|16@1+ (1,0) [0|65535] "raw" Vector__XXX
+
+VAL_ 256 RunState 0 "Idle" 1 "Run" 2 "Fault" ;
+BA_ "GenMsgCycleTime" BO_ 256 10;
+BA_ "GenMsgCycleTime" BO_ 512 10;

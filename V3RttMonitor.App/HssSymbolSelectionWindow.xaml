@@ -1,0 +1,70 @@
+<Window x:Class="V3RttMonitor.App.HssSymbolSelectionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="HSS变量选择" Width="980" Height="700" MinWidth="820" MinHeight="560"
+        WindowStartupLocation="CenterOwner" Background="{StaticResource WindowBackgroundBrush}"
+        Foreground="{StaticResource PrimaryTextBrush}" Icon="Assets/JustFloatMonitor.ico"
+        UseLayoutRounding="True" SnapsToDevicePixels="True">
+    <Grid Margin="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel>
+            <TextBlock Text="HSS变量选择" FontSize="22" FontWeight="SemiBold" />
+            <TextBlock x:Name="ElfSummaryText" Foreground="{StaticResource SecondaryTextBrush}" Margin="0,4,0,0" />
+            <TextBlock Text="提示：ELF符号表不能可靠区分float/int；4字节变量默认Float32，请按源码确认。普通V9探针通常最多10个变量。" Foreground="#FBBF24" FontSize="11" Margin="0,4,0,0" />
+        </StackPanel>
+
+        <Grid Grid.Row="1" Margin="0,12,0,10">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+            <TextBox x:Name="SearchBox" TextChanged="Filter_OnChanged" ToolTip="搜索变量名或section" />
+            <CheckBox x:Name="ScalarOnlyCheck" Grid.Column="1" Content="仅标量" IsChecked="True" Checked="Filter_OnChanged" Unchecked="Filter_OnChanged" Margin="12,4" />
+            <Button Grid.Column="2" Content="勾选当前结果" Click="SelectVisibleButton_OnClick" />
+            <Button Grid.Column="3" Content="全部清空" Click="ClearButton_OnClick" />
+        </Grid>
+
+        <DataGrid x:Name="SymbolGrid" Grid.Row="2" AutoGenerateColumns="False" CanUserAddRows="False"
+                  HeadersVisibility="Column" GridLinesVisibility="Horizontal" SelectionMode="Single"
+                  Background="#0B1220" Foreground="{StaticResource PrimaryTextBrush}"
+                  BorderBrush="{StaticResource BorderBrush}" RowBackground="#0F172A" AlternatingRowBackground="#111C31">
+            <DataGrid.Resources>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="#172033" /><Setter Property="Foreground" Value="{StaticResource PrimaryTextBrush}" />
+                    <Setter Property="Padding" Value="8,7" /><Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+                </Style>
+                <Style TargetType="DataGridCell">
+                    <Setter Property="BorderBrush" Value="#26344B" /><Setter Property="Padding" Value="6,4" />
+                    <Setter Property="Foreground" Value="{StaticResource PrimaryTextBrush}" />
+                </Style>
+            </DataGrid.Resources>
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="选择" Width="58">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate><CheckBox IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding CanSelect}" HorizontalAlignment="Center" /></DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="变量" Binding="{Binding Name}" Width="*" IsReadOnly="True" />
+                <DataGridTextColumn Header="地址" Binding="{Binding Address}" Width="120" IsReadOnly="True" />
+                <DataGridTextColumn Header="大小" Binding="{Binding SizeText}" Width="70" IsReadOnly="True" />
+                <DataGridTextColumn Header="Section" Binding="{Binding Section}" Width="90" IsReadOnly="True" />
+                <DataGridTextColumn Header="作用域" Binding="{Binding Scope}" Width="80" IsReadOnly="True" />
+                <DataGridTemplateColumn Header="数值解释" Width="125">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate><ComboBox ItemsSource="{Binding NumericTypes}" SelectedItem="{Binding NumericType, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding CanSelect}" /></DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Grid Grid.Row="3" Margin="0,10,0,0">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+            <TextBlock x:Name="SelectionStatusText" VerticalAlignment="Center" Foreground="{StaticResource SecondaryTextBrush}" />
+            <Button Grid.Column="1" Content="取消" IsCancel="True" MinWidth="90" />
+            <Button Grid.Column="2" Content="应用变量" Click="ApplyButton_OnClick" Background="#075985" MinWidth="105" />
+        </Grid>
+    </Grid>
+</Window>

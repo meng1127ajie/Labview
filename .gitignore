@@ -1,0 +1,13 @@
+**/bin/
+**/obj/
+.dotnet_cli/
+.release_selector/
+artifacts/
+dist/
+JLINK-SDK/
+*.user
+*.suo
+*.binlog
+*.bin
+_smoketest/
+_smoketest.log
